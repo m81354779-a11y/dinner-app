@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>晩ごはんお助けアプリ</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+    #result { margin-top: 20px; font-size: 20px; font-weight: bold; }
+    .form-area { margin-top: 30px; padding: 15px; border-top: 1px solid #ccc; }
+    input, select { padding: 8px; font-size: 14px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>今日の晩ごはんは？</h1>
+  <p>気分をタップしてね（候補からランダム表示）</p>
+  
+  <button onclick="showMenu('chicken')">鶏肉</button>
+  <button onclick="showMenu('pork')">豚肉</button>
+  <button onclick="showMenu('beef')">牛肉</button>
+  <button onclick="showMenu('noodles')">麺類</button>
+  <button onclick="showMenu('cheap')">節約系</button>
+  <button onclick="showMenu('oneplate')">ワンプレート</button>
+  
+  <div id="result"></div>
+
+  <!-- 献立追加フォーム -->
+  <div class="form-area">
+    <h3>献立を追加する</h3>
+    <form onsubmit="addMenu(event)">
+      <input type="text" id="newMenu" placeholder="料理名を入力" required>
+      <select id="category">
+        <option value="chicken">鶏肉</option>
+        <option value="pork">豚肉</option>
+        <option value="beef">牛肉</option>
+        <option value="noodles">麺類</option>
+        <option value="cheap">節約系</option>
+        <option value="oneplate">ワンプレート</option>
+      </select>
+      <button type="submit">追加</button>
+    </form>
+    <p style="font-size:12px; color:gray;">※追加した献立はブラウザに保存されます</p>
+  </div>
+
+  <script>
+    // デフォルトの献立
+    const defaultMenus = {
+      chicken: ["唐揚げ", "もも肉ソテー", "ヤンニョムチキン"],
+      pork: ["竜田揚げ", "生姜焼き"],
+      beef: ["焼肉", "牛丼"],
+      noodles: ["ミートソースパスタ", "ラーメン", "カルボナーラ", "きつねうどん"],
+      cheap: ["納豆＆味噌汁", "卵焼き"],
+      oneplate: ["オムライス", "チャーハン"]
+    };
+
+    // localStorage から読み込む
+    let menus = JSON.parse(localStorage.getItem("menus"));
+
+    // データがなければ defaultMenus をコピーして保存
+    if (!menus || Object.keys(menus).length === 0) {
+      menus = JSON.parse(JSON.stringify(defaultMenus));
+      localStorage.setItem("menus", JSON.stringify(menus));
+    }
+
+    // ページ読み込み時に初期表示（鶏肉カテゴリのランダムメニュー）
+    window.onload = function() {
+      showMenu('chicken');
+    }
+
+    // ランダム表示
+    function showMenu(type) {
+      const list = menus[type];
+      if (!list || list.length === 0) {
+        document.getElementById("result").innerHTML = "まだ献立がありません";
+        return;
+      }
+      const choice = list[Math.floor(Math.random() * list.length)];
+      document.getElementById("result").innerHTML = "おすすめは 👉 " + choice;
+    }
+
+    // 献立追加
+    function addMenu(event) {
+      event.preventDefault();
+      const newMenu = document.getElementById("newMenu").value.trim();
+      const category = document.getElementById("category").value;
+
+      if (newMenu) {
+        if (!menus[category]) menus[category] = [];
+        menus[category].push(newMenu);
+        localStorage.setItem("menus", JSON.stringify(menus));
+        alert("「" + newMenu + "」を追加しました！");
+        document.getElementById("newMenu").value = "";
+      }
+    }
+  </script>
+
+  <p style="margin-top:20px; font-size:12px; color:gray;">
+    v0.5（初期メニュー自動表示＆追加対応版）
+  </p>
+</body>
+</html>
